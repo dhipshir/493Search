@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <title> 493 Artist Search</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="script.js"></script>
+    
+  </title>
+</head>
+<style>
+
+h5{
+  padding-bottom: 5px;
+  padding-top: 3px;
+}
+
+.genre{
+  border:solid 2px;
+  border-radius: 3px;
+  margin:5px;
+  white-space: nowrap;
+  background-color:#ccc;
+  padding:2px;
+}
+
+.genre.on {
+  color: black;
+  background-color: rgb(67, 117, 192);
+}
+
+</style>
+<body ng-app = "493Search">
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+       <h3>493 Artist Search</h3>
+    </div>
+  </div>
+</nav>
+<div class = "container" ng-controller="searchResult">
+  <div class = "row searchbar" >
+    <div class = "col-lg-12 col-md-12 col-sm-12">
+      <h4>Input an Artist's name and press enter:</h4>
+      <input type="text" ng-keyup="getInfo($event)" ng-model="input.text">
+    </div>
+  </div>
+  <div class = "row">
+    <div class = "col-lg-12 col-md-12 col-sm-12">
+      <h4>Search Results ({{searchResults.length}} total found.)</h4>
+      <p style="font-size: 16px;">Filter by genre</p>
+      <button ng-repeat="(key, value) in genreButtons" ng-class="{on: genreButtons[key].selected}" class="genre" ng-click="updateFilter(key, value.selected)">{{key}}</button>
+      <h4>List of results</h4>
+    </div>
+  </div>
+  <!-- Begin displaying results of an artist search -->
+  <div class = "row" style="display: flex; flex-wrap: wrap;">
+    <div class = "col-lg-6 col-md-6 col-sm-6" ng-repeat="result in searchResults" ng-show="genreButtons['ALL'].selected || genreButtons[result.primaryGenreName].selected">
+      <div class="row">
+        <!-- A result's col for its image -->
+        <div class="col-lg-3 col-md-3 col-sm-3" style="width: 40%; padding-bottom: 25px;">
+          <img ng-src={{result.artworkUrl100}} style="width:100%; max-height:200px;">
+        </div>
+        <!-- A result's col for its info and tabs -->
+        <div class="col-lg-3 col-md-3 col-sm-3" style="width: 50%; min-height: 100px;">
+          <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" ng-href="#description-{{$index}}">Description</a></li>
+            <li><a data-toggle="tab" ng-click="getArtistInfo($index, searchResults[$index].artistName)" ng-href="#artist-{{$index}}">Artist Infor.</a></li>
+          </ul>
+          <div class="tab-content">
+            <!-- Contents of a result's Description tab -->
+            <div id="description-{{$index}}" class="tab-pane fade in active">
+              <p><b>Artist Name: </b>{{result.artistName.length > 100 ? ((result.artistName | limitTo:100) + "...") : result.artistName}}</p>
+              <p><b>Collection Name: </b>{{result.collectionName.length > 100 ? ((result.collectionName | limitTo:100) + "...") : result.collectionName}}</p>
+              <p ng-if="result.kind !== 'song'"><b>Price: </b>${{result.collectionPrice}}</p>
+              <p ng-if="result.kind == 'song'"><b>Price: </b>${{result.trackPrice}}</p>
+              <p><b>Type: </b>{{result.kind}}</p>
+              <p><b>Preview: </b><a ng-href="{{result.previewUrl}}">link</a></p>
+            </div>
+            <!-- Contents of a result's Artist Info. tab -->
+            <div id="artist-{{$index}}" class="tab-pane fade">
+              <img ng-src="loading.gif" ng-if="needsLoad[$index]" style="max-height: 200px;">
+              <p ng-if="!needsLoad[$index]">{{result.artistWikiInfo.length > 100 ? ((result.artistWikiInfo | limitTo:200) + "...") : result.artistWikiInfo}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
